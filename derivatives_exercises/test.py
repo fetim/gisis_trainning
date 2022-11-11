@@ -2,18 +2,17 @@ import GISIS_library
 import numpy as np
 import matplotlib.pyplot as plt
 
+#start class
+function = GISIS_library.polynomns()
 
-test1 = GISIS_library.polynomns()
-# test1.polynomn1(2,1)
-# test1.polynomn2(1,0,0)
-# test1.polynomn3(1,0,0,0)
-test1.sine(30)
+# create the function
+function.select_function("sum_2_sines",a=3,b=4,c=1,d=20)
+
 plt.figure()
-for i in range(0,1000,10):
-    test1.viewGraph()
-    plt.ylim(-2,2)
-    test1.tangent_line(i)
-    plt.plot(test1.x,test1.df_dx)
-    plt.pause(0.2)
-    plt.show(block=False)
-    plt.clf()
+# movie to view the tangent line in all points
+for i in range(0,function.N,function.step):
+    function.viewGraph()
+    # find the tangent line
+    function.tangent_line_evalution(i)
+    function.viewTangentLine()
+    
