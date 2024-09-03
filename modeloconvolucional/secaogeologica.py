@@ -39,15 +39,26 @@ plt.gca().invert_yaxis()
 plt.subplot(1,3,2)
 plt.plot(vp,t)
 plt.xlabel('Velocidade Compressional')
-
 plt.gca().invert_yaxis()
 
 plt.subplot(1,3,3)
 plt.plot(Z,t)
 plt.xlabel('Impedância acústica')
-
 plt.gca().invert_yaxis()
+plt.tight_layout()
 
+
+# Criando uma secao 2D
+z2D = np.zeros([Nt,Nx])
+for ix in range(Nx):
+    z2D[:,ix] = Z
+
+plt.figure()
+plt.imshow(z2D,cmap="jet",aspect="auto",extent=[t[-1],t[0],x[0],x[-1]])
+plt.xlabel("distancia lateral (m)")
+plt.ylabel("tempo (s)")
+plt.title("Impedancia")
+plt.colorbar()
 plt.tight_layout()
 plt.show()
 
