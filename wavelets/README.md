@@ -1,2 +1,2 @@
 # to run
-`python3 -i wavelet.py`
+`python3 -i morlet.py`
