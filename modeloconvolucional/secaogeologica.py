@@ -2,36 +2,56 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import ricker
 
-x = np.linspace(0, 6, 500)
-y = np.linspace(0,10,1331)
 
-camada1,camada2,camada3 = np.full_like(x, 3),np.full_like(x, 6), np.full_like(x, 10)
+Nx = 501
+dx = 10
+Nt = 1001
+dt = 0.001
 
-plt.fill_between(x, 0, camada1, color='orange', label='Camada 1')
-plt.fill_between(x, camada1, camada2, color='yellow', label='Camada 2')
-plt.fill_between(x, camada2,camada3, color='brown', label='Camada 3')
-plt.xlabel('Distância horizontal')
-plt.ylabel('Profundidade')
+x = np.linspace(0,dx*(Nx-1),Nx)
+t = np.linspace(0,dt*(Nt-1),Nt) # O tempo representará a profundidade nesse caso
+
+t1,t2          = 0.3, 0.6 # tempos (profundidade) das interfaces
+rho1,rho2,rho3 = 2200,2400,2700 # densidade de cada camada
+vp1,vp2,vp3    = 2500,3000,3500 # velocidade de cada camada
+z1,z2,z3       = rho1*vp1,rho2*vp2,rho3*vp3
+
+# criando os perfis
+rho = np.zeros(Nt)
+vp  = np.zeros(Nt)
+
+rho[:int(t1/dt)]           = rho1
+rho[int(t1/dt):int(t2/dt)] = rho2
+rho[int(t2/dt):]           = rho3
+
+vp[:int(t1/dt)]           = vp1
+vp[int(t1/dt):int(t2/dt)] = vp2
+vp[int(t2/dt):]           = vp3
+
+Z = vp * rho
+
+plt.figure()
+plt.subplot(1,3,1)
+plt.plot(rho,t)
+plt.xlabel('Densidade')
 plt.gca().invert_yaxis()
-plt.title('Seção Geológica')
-plt.legend()
-plt.show()
 
-p_1,p_2,p_3= 2200,2400,2700
-v1,v2,v3 = 2500,3000,3500
-z1,z2,z3 = p_1*v1,p_2*v2,p_3*v3
-Z = y.copy()
-Z[(Z>=0)&(Z<=3)] = z1
-Z[(Z>=3)&(Z<=6)] = z2
-Z[(Z>=6)&(Z<=10)] = z3
+plt.subplot(1,3,2)
+plt.plot(vp,t)
+plt.xlabel('Velocidade Compressional')
 
-plt.plot(Z,y)
+plt.gca().invert_yaxis()
+
+plt.subplot(1,3,3)
+plt.plot(Z,t)
 plt.xlabel('Impedância acústica')
-plt.ylabel('Profundidade')
-plt.title('Perfil de Impedância Acústica das Camadas')
+
 plt.gca().invert_yaxis()
+
+plt.tight_layout()
 plt.show()
 
+##### REFAZER daqui para baixo
 r12 = (z2 - z1) / (z2 + z1)
 r23 = (z3 - z2) / (z3 + z2)
 R = np.zeros_like(y)
