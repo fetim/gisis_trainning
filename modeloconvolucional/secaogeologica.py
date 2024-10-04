@@ -65,11 +65,11 @@ plt.show()
 ##### REFAZER daqui para baixo
 r12 = (z2 - z1) / (z2 + z1)
 r23 = (z3 - z2) / (z3 + z2)
-R = np.zeros_like(y)
-R[np.isclose(y, 3, atol=0.01)] = r12
-R[np.isclose(y, 6, atol=0.01)] = r23
+R = np.zeros_like(t)
+R[np.isclose(t, 3, atol=0.01)] = r12
+R[np.isclose(t, 6, atol=0.01)] = r23
 
-plt.plot(R,y)
+plt.plot(R,t)
 plt.xlabel('Coeficiente de Reflexão')
 plt.ylabel('Profundidade')
 plt.xlim(-0.2,0.2)
