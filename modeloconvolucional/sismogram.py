@@ -1,6 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import ricker
+
+def ricker(t,fcut,tlag=0):
+    """
+    Ricker wavelet using cut off frequency.
+    """
+    pi = np.pi
+    td = t - tlag
+    fc = fcut / (3*np.sqrt(pi))
+    return (1-2*pi*(pi*fc*td)**2)*np.exp(-pi*(pi*fc*td)**2)
 
 h = 1000
 v1 = 1500
@@ -12,9 +20,11 @@ dx = 10
 Nt = 6001
 dt = 0.001
 
-wavelet = ricker(Nt, 4)
+
 x = np.linspace(0,dx*(Nx-1),Nx)
 t = np.linspace(0,dt*(Nt-1),Nt)
+wavelet = ricker(t,30,t[-1]/2)
+
 
 t_ref = np.sqrt((2*h/v1)*2 + (x/v1)*2)
 t_direct = x/v1

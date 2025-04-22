@@ -1,6 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import ricker
+# from scipy.signal import ricker
+
+def ricker(t,fcut,tlag=0):
+    """
+    Ricker wavelet using cut off frequency.
+    """
+    pi = np.pi
+    td = t - tlag
+    fc = fcut / (3*np.sqrt(pi))
+    return (1-2*pi*(pi*fc*td)**2)*np.exp(-pi*(pi*fc*td)**2)
 
 
 Nx = 501
@@ -12,8 +21,8 @@ x = np.linspace(0,dx*(Nx-1),Nx)
 t = np.linspace(0,dt*(Nt-1),Nt) # O tempo representará a profundidade nesse caso
 
 t1,t2          = 0.3, 0.6 # tempos (profundidade) das interfaces
-rho1,rho2,rho3 = 2200,2400,2700 # densidade de cada camada
-vp1,vp2,vp3    = 2500,3000,3500 # velocidade de cada camada
+rho1,rho2,rho3 = 1000,2400,3400 # densidade de cada camada
+vp1,vp2,vp3    = 1500,3000,4000 # velocidade de cada camada
 z1,z2,z3       = rho1*vp1,rho2*vp2,rho3*vp3
 
 # criando os perfis
@@ -46,15 +55,16 @@ plt.plot(Z,t)
 plt.xlabel('Impedância acústica')
 plt.gca().invert_yaxis()
 plt.tight_layout()
-
+plt.show()
 
 # Criando uma secao 2D
 z2D = np.zeros([Nt,Nx])
 for ix in range(Nx):
     z2D[:,ix] = Z
 
+# Calculando a impedância
 plt.figure()
-plt.imshow(z2D,cmap="jet",aspect="auto",extent=[t[-1],t[0],x[0],x[-1]])
+plt.imshow(z2D,cmap="jet",aspect="auto",extent=[x[0],x[-1],t[-1],t[0]])
 plt.xlabel("distancia lateral (m)")
 plt.ylabel("tempo (s)")
 plt.title("Impedancia")
@@ -62,49 +72,45 @@ plt.colorbar()
 plt.tight_layout()
 plt.show()
 
-##### REFAZER daqui para baixo
-r12 = (z2 - z1) / (z2 + z1)
-r23 = (z3 - z2) / (z3 + z2)
-R = np.zeros_like(t)
-R[np.isclose(t, 3, atol=0.01)] = r12
-R[np.isclose(t, 6, atol=0.01)] = r23
+# Calculando a refletividade
+R = np.zeros(Nt)
+for i in range(Nt-1):
+    R[i] = (Z[i+1]-Z[i])/(Z[i+1]+Z[i])
 
+plt.figure()
 plt.plot(R,t)
 plt.xlabel('Coeficiente de Reflexão')
-plt.ylabel('Profundidade')
-plt.xlim(-0.2,0.2)
-plt.gca().invert_yaxis()
-plt.show()
-
-t1 = 2*3/v1
-t2 = 2*6/v2
-t3= 2*10/v3
-print(t1,t2,t3)
-t = np.linspace(0,0.005,500)
-R_tempo = np.zeros_like(t)
-R_tempo[np.isclose(t, t1, atol=0.0001)] = r12
-R_tempo[np.isclose(t, t2, atol=0.0001)] = r23
-
-plt.plot(R_tempo,t)
-plt.xlabel('Coeficiente de reflexão')
 plt.ylabel('Tempo')
-plt.gca().invert_yaxis()
+plt.ylim(t[-1],t[0])
 plt.show()
 
-wavelet = ricker(500, 4)
-sinal = np.convolve(R_tempo,wavelet,mode='same')
+wavelet = ricker(t, 40,t[-1]/2) # wavelet de fase zero
 
-plt.plot(t, sinal)
-plt.ylabel('Sinal Sísmico')
-plt.xlabel('Tempo')
-plt.show()
+# convolução com numpy
+sinal = np.convolve(R,wavelet,mode='same')
 
-R_tempo_fft = np.fft.rfft(R_tempo)
-wavelet_fft = np.fft.rfft(wavelet)
-sinal_fft = R_tempo_fft * wavelet_fft
-sinal_tempo = np.fft.irfft(sinal_fft)
+# convolução com FFT
+tshift = 0 #t[-1]/2
+w = 2*np.pi*np.fft.fftfreq(Nt,dt)
+R_fft = np.fft.fft(R)
+wavelet_fft = np.fft.fft(wavelet)
+sinal_fft =  R_fft * wavelet_fft * np.exp(-1.0j*w*tshift)
+sinal_tempo = np.fft.fftshift(np.fft.ifft(sinal_fft))
 
-plt.plot(t,sinal_tempo)
-plt.ylabel('Sinal Sísmico')
-plt.xlabel('Tempo')
+plt.subplot(1,3,1)
+plt.plot(wavelet,t)
+plt.ylabel('Tempo')
+plt.ylim(t[-1],t[0])
+
+plt.subplot(1,3,2)
+plt.plot(R,t)
+plt.ylim(t[-1],t[0])
+
+plt.subplot(1,3,3)
+plt.plot(sinal,t,label='convolução numpy')
+plt.plot(sinal_tempo,t,label='convolução FFT')
+plt.ylim(t[-1],t[0])
+
+plt.tight_layout()
+plt.legend()
 plt.show()

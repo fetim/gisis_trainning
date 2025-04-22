@@ -76,7 +76,7 @@ class polynomns:
 
     def viewTangentLine(self):
         plt.plot(self.x,self.tangent_line)
-        plt.pause(0.05) # viewing in slow motion
+        plt.pause(0.1) # viewing in slow motion
         plt.show(block=False)
         plt.clf() # clean the plot
     
